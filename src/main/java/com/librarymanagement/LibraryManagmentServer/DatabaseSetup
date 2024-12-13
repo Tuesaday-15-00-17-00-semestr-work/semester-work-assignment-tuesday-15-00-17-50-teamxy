@@ -1,0 +1,53 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class DatabaseSetup {
+    public static void main(String[] args) {
+
+        String url = "jdbc:sqlite:library.db"; // Creates library.db in the project root
+
+        // SQL statements for creating tables
+        String createUsersTable = "CREATE TABLE IF NOT EXISTS Users ("
+                + "user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "username TEXT NOT NULL,"
+                + "password TEXT NOT NULL,"
+                + "role_id INTEGER,"
+                + "email TEXT,"
+                + "FOREIGN KEY (role_id) REFERENCES Roles(role_id));";
+
+        String createBooksTable = "CREATE TABLE IF NOT EXISTS Books ("
+                + "book_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "title TEXT NOT NULL,"
+                + "author TEXT NOT NULL,"
+                + "isbn TEXT NOT NULL,"
+                + "available_copies INTEGER NOT NULL);";
+
+        String createRolesTable = "CREATE TABLE IF NOT EXISTS Roles ("
+                + "role_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "role_name TEXT NOT NULL);";
+
+        String createTransactionsTable = "CREATE TABLE IF NOT EXISTS Transactions ("
+                + "transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "user_id INTEGER,"
+                + "book_id INTEGER,"
+                + "action TEXT NOT NULL,"
+                + "date DATETIME DEFAULT CURRENT_TIMESTAMP,"
+                + "FOREIGN KEY (user_id) REFERENCES Users(user_id),"
+                + "FOREIGN KEY (book_id) REFERENCES Books(book_id));";
+
+        // Establish a connection and create tables
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement()) {
+            // Create tables
+            stmt.execute(createUsersTable);
+            stmt.execute(createBooksTable);
+            stmt.execute(createRolesTable);
+            stmt.execute(createTransactionsTable);
+            System.out.println("Tables created successfully.");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}
